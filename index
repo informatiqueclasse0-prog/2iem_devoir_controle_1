@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM - Architecture d'un micro-ordinateur</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eaeaea;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        
+        .description {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+        
+        .progress-container {
+            margin-bottom: 25px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 5%;
+            transition: width 0.5s ease;
+        }
+        
+        .question-counter {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option {
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e0e0e0;
+            background-color: white;
+            display: flex;
+            align-items: center;
+        }
+        
+        .option:hover {
+            background-color: #f0f8ff;
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .option.selected {
+            background-color: #e1f5fe;
+            border-color: #0288d1;
+            box-shadow: 0 4px 8px rgba(2, 136, 209, 0.2);
+        }
+        
+        .option.correct {
+            background-color: #e8f5e9;
+            border-color: #4caf50;
+        }
+        
+        .option.incorrect {
+            background-color: #ffebee;
+            border-color: #f44336;
+        }
+        
+        .option-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 50%;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        #submit-btn {
+            background-color: #2ecc71;
+        }
+        
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        .results {
+            text-align: center;
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .results h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .score {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #2c3e50;
+        }
+        
+        .score-excellent {
+            color: #2ecc71;
+        }
+        
+        .score-good {
+            color: #3498db;
+        }
+        
+        .score-average {
+            color: #f39c12;
+        }
+        
+        .score-poor {
+            color: #e74c3c;
+        }
+        
+        .answers-summary {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .answer-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: white;
+            border-left: 5px solid #3498db;
+        }
+        
+        .answer-correct {
+            border-left-color: #2ecc71;
+        }
+        
+        .answer-incorrect {
+            border-left-color: #e74c3c;
+        }
+        
+        .restart-btn {
+            background-color: #e67e22;
+            margin-top: 20px;
+        }
+        
+        .restart-btn:hover {
+            background-color: #d35400;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>QCM - Préparation du devoir de contrôle numéro 1 pour la deuxième année secondaire.</h1>
+            <p class="description">Testez vos connaissances sur l'architecture des ordinateurs</p>
+        </header>
+        
+        <div class="progress-container">
+            <div class="question-counter" id="progress">Question 1 sur 20</div>
+            <div class="progress-bar">
+                <div class="progress" id="progress-bar"></div>
+            </div>
+        </div>
+        
+        <div id="quiz-container"></div>
+        
+        <div class="controls">
+            <button id="prev-btn" disabled>Question précédente</button>
+            <button id="next-btn">Question suivante</button>
+            <button id="submit-btn" style="display: none;">Soumettre le quiz</button>
+        </div>
+        
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        // Données du QCM
+        const quizData = [
+            {
+                question: "1. Quel est le composant qui exécute les traitements dans un ordinateur ?",
+                correctAnswer: "Le processeur",
+                options: ["Le processeur", "La mémoire vive", "Le disque dur"]
+            },
+            {
+                question: "2. Comment s'appelle l'ensemble de fils conducteurs permettant la communication entre le processeur et la mémoire ?",
+                correctAnswer: "Le bus",
+                options: ["Le bus", "Le circuit imprimé", "Le câble d'alimentation"]
+            },
+            {
+                question: "3. Quelle unité mesure la fréquence d'horloge d'un processeur ?",
+                correctAnswer: "Le Hertz (MHz, GHz)",
+                options: ["Le Hertz (MHz, GHz)", "Le bit par seconde (b/s)", "La nanoseconde (ns)"]
+            },
+            {
+                question: "4. Que signifie l'acronyme 'U.A.L.' dans un processeur ?",
+                correctAnswer: "Unité Arithmétique et Logique",
+                options: ["Unité Arithmétique et Logique", "Unité d'Accès Libre", "Unité d'Adressage Logique"]
+            },
+            {
+                question: "5. Quel registre spécial pointe sur la prochaine instruction à exécuter dans un processeur ?",
+                correctAnswer: "Le Compteur Ordinal (C.O.)",
+                options: ["Le Compteur Ordinal (C.O.)", "L'Unité de Commande (U.C.)", "Le registre d'accumulateur"]
+            },
+            {
+                question: "6. Comment s'appelle la séquence 'chargement-décodage-exécution' au cœur du processeur ?",
+                correctAnswer: "Le cycle de traitement",
+                options: ["Le cycle de traitement", "Le processus de calcul", "La séquence de boot"]
+            },
+            {
+                question: "7. Comment s'appelle le numéro d'une cellule en mémoire ?",
+                correctAnswer: "Une adresse",
+                options: ["Une adresse", "Un index", "Un identifiant"]
+            },
+            {
+                question: "8. Quelle caractéristique d'une mémoire correspond au nombre total d'octets qu'elle peut enregistrer ?",
+                correctAnswer: "La capacité",
+                options: ["La capacité", "Le temps d'accès", "Le débit"]
+            },
+            {
+                question: "9. En quoi s'exprime couramment la capacité de la mémoire vive ?",
+                correctAnswer: "En Mégaoctets (Mo)",
+                options: ["En Mégaoctets (Mo)", "En Mégahertz (MHz)", "En nanosecondes (ns)"]
+            },
+            {
+                question: "10. Que signifie l'acronyme 'RAM' ?",
+                correctAnswer: "Random Access Memory (Mémoire à Accès Aléatoire)",
+                options: ["Random Access Memory (Mémoire à Accès Aléatoire)", "Read And Modify (Lire et Modifier)", "Rapid Access Memory (Mémoire à Accès Rapide)"]
+            },
+            {
+                question: "11. Que se passe-t-il avec le contenu de la mémoire RAM lors d'une coupure de courant ?",
+                correctAnswer: "Il est détruit (mémoire volatile)",
+                options: ["Il est détruit (mémoire volatile)", "Il est sauvegardé automatiquement", "Il reste intact (mémoire permanente)"]
+            },
+            {
+                question: "12. Que signifie l'acronyme 'ROM' ?",
+                correctAnswer: "Read Only Memory (Mémoire à Lecture Seule)",
+                options: ["Read Only Memory (Mémoire à Lecture Seule)", "Random Operation Memory (Mémoire à Opération Aléatoire)", "Rapid Output Memory (Mémoire de Sortie Rapide)"]
+            },
+            {
+                question: "13. Quel est le contenu principal de la mémoire ROM ?",
+                correctAnswer: "Le BIOS et les programmes de démarrage",
+                options: ["Le BIOS et les programmes de démarrage", "Les fichiers de l'utilisateur", "Le système d'exploitation"]
+            },
+            {
+                question: "14. Que se passe-t-il avec le contenu de la mémoire ROM lors d'une coupure de courant ?",
+                correctAnswer: "Il est conservé (mémoire permanente)",
+                options: ["Il est conservé (mémoire permanente)", "Il est partiellement effacé", "Il est détruit"]
+            },
+            {
+                question: "15. Quel type de mémoire ROM est effaçable par des rayons ultraviolets ?",
+                correctAnswer: "EPROM",
+                options: ["EPROM", "PROM", "EEPROM"]
+            },
+            {
+                question: "16. Quel type de mémoire ROM est effaçable par un simple courant électrique ?",
+                correctAnswer: "EEPROM (mémoire flash)",
+                options: ["EEPROM (mémoire flash)", "EPROM", "PROM"]
+            },
+            {
+                question: "17. Quel est le principal avantage de la mémoire cache ?",
+                correctAnswer: "Son temps d'accès très court",
+                options: ["Son temps d'accès très court", "Sa grande capacité de stockage", "Son faible coût"]
+            },
+            {
+                question: "18. Où se trouve la mémoire cache de niveau 1 (L1) ?",
+                correctAnswer: "Intégrée au processeur",
+                options: ["Intégrée au processeur", "Sur la carte mère", "Sur la barrette de RAM"]
+            },
+            {
+                question: "19. Quel type de mémoire est généralement utilisé pour la cache ?",
+                correctAnswer: "SRAM (Static RAM)",
+                options: ["SRAM (Static RAM)", "DRAM (Dynamic RAM)", "ROM (Read Only Memory)"]
+            },
+            {
+                question: "20. Quel composant contient les programmes et pilotes pour le démarrage de l'ordinateur ?",
+                correctAnswer: "La ROM BIOS",
+                options: ["La ROM BIOS", "La mémoire cache", "Le disque dur"]
+            }
+        ];
+
+        // Mélanger les options pour chaque question
+        quizData.forEach(question => {
+            // Mélanger les options aléatoirement
+            for (let i = question.options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [question.options[i], question.options[j]] = [question.options[j], question.options[i]];
+            }
+        });
+
+        let currentQuestion = 0;
+        let userAnswers = new Array(quizData.length).fill(null);
+        let quizCompleted = false;
+
+        const quizContainer = document.getElementById('quiz-container');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const progress = document.getElementById('progress');
+        const progressBar = document.getElementById('progress-bar');
+        const results = document.getElementById('results');
+
+        // Afficher la question actuelle
+        function showQuestion() {
+            const question = quizData[currentQuestion];
+            
+            let questionHTML = `
+                <div class="question">
+                    <div class="question-text">${question.question}</div>
+                    <div class="options">
+            `;
+            
+            question.options.forEach((option, index) => {
+                const isSelected = userAnswers[currentQuestion] === option;
+                const optionClass = isSelected ? 'option selected' : 'option';
+                
+                questionHTML += `
+                    <div class="${optionClass}" data-option="${option}">
+                        <span class="option-letter">${String.fromCharCode(65 + index)}</span>
+                        ${option}
+                    </div>
+                `;
+            });
+            
+            questionHTML += `</div></div>`;
+            
+            quizContainer.innerHTML = questionHTML;
+            
+            // Ajouter les écouteurs d'événements pour les options
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', selectOption);
+            });
+            
+            // Mettre à jour la progression
+            progress.textContent = `Question ${currentQuestion + 1} sur ${quizData.length}`;
+            progressBar.style.width = `${((currentQuestion + 1) / quizData.length) * 100}%`;
+            
+            // Gérer l'état des boutons
+            prevBtn.disabled = currentQuestion === 0;
+            
+            if (currentQuestion === quizData.length - 1) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'inline-block';
+            } else {
+                nextBtn.style.display = 'inline-block';
+                submitBtn.style.display = 'none';
+            }
+        }
+
+        // Sélectionner une option
+        function selectOption(e) {
+            if (quizCompleted) return;
+            
+            const selectedOption = e.target.getAttribute('data-option');
+            userAnswers[currentQuestion] = selectedOption;
+            
+            // Mettre à jour l'affichage
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            e.target.classList.add('selected');
+        }
+
+        // Question suivante
+        function nextQuestion() {
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            }
+        }
+
+        // Question précédente
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        // Soumettre le quiz
+        function submitQuiz() {
+            quizCompleted = true;
+            
+            // Calculer le score
+            let score = 0;
+            quizData.forEach((question, index) => {
+                if (userAnswers[index] === question.correctAnswer) {
+                    score++;
+                }
+            });
+            
+            // Déterminer la classe de score
+            let scoreClass = 'score-poor';
+            if (score >= quizData.length * 0.8) {
+                scoreClass = 'score-excellent';
+            } else if (score >= quizData.length * 0.6) {
+                scoreClass = 'score-good';
+            } else if (score >= quizData.length * 0.4) {
+                scoreClass = 'score-average';
+            }
+            
+            // Afficher les résultats
+            results.style.display = 'block';
+            results.innerHTML = `
+                <h2>Résultats du quiz</h2>
+                <div class="score ${scoreClass}">${score} / ${quizData.length}</div>
+                <p>${score >= quizData.length * 0.7 ? 
+                    'Félicitations! Vous avez une excellente connaissance de l\'architecture des ordinateurs.' : 
+                    score >= quizData.length * 0.5 ?
+                    'Bon travail! Vous avez une bonne compréhension de l\'architecture des ordinateurs.' :
+                    'Continuez à étudier pour améliorer vos connaissances sur l\'architecture des ordinateurs.'
+                }</p>
+                <button class="restart-btn" id="restart-btn">Recommencer le quiz</button>
+            `;
+            
+            // Ajouter l'écouteur d'événement pour le bouton de redémarrage
+            document.getElementById('restart-btn').addEventListener('click', restartQuiz);
+            
+            // Désactiver les boutons
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            submitBtn.disabled = true;
+            
+            // Afficher les réponses correctes
+            showAnswers();
+        }
+
+        // Redémarrer le quiz
+        function restartQuiz() {
+            currentQuestion = 0;
+            userAnswers = new Array(quizData.length).fill(null);
+            quizCompleted = false;
+            
+            // Réinitialiser l'affichage
+            results.style.display = 'none';
+            prevBtn.disabled = false;
+            nextBtn.disabled = false;
+            submitBtn.disabled = false;
+            
+            // Mélanger à nouveau les options
+            quizData.forEach(question => {
+                for (let i = question.options.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [question.options[i], question.options[j]] = [question.options[j], question.options[i]];
+                }
+            });
+            
+            showQuestion();
+        }
+
+        // Afficher les réponses correctes
+        function showAnswers() {
+            let answersHTML = '<div class="answers-summary"><h3>Récapitulatif des réponses:</h3>';
+            
+            quizData.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correctAnswer;
+                
+                answersHTML += `
+                    <div class="answer-item ${isCorrect ? 'answer-correct' : 'answer-incorrect'}">
+                        <div class="question-text">${question.question}</div>
+                        <p><strong>Votre réponse:</strong> ${userAnswer || 'Aucune réponse'}</p>
+                        <p><strong>Réponse correcte:</strong> ${question.correctAnswer}</p>
+                        <p><strong>Statut:</strong> ${isCorrect ? 'Correct' : 'Incorrect'}</p>
+                    </div>
+                `;
+            });
+            
+            answersHTML += '</div>';
+            quizContainer.innerHTML += answersHTML;
+        }
+
+        // Initialiser les écouteurs d'événements
+        prevBtn.addEventListener('click', prevQuestion);
+        nextBtn.addEventListener('click', nextQuestion);
+        submitBtn.addEventListener('click', submitQuiz);
+
+        // Afficher la première question
+        showQuestion();
+    </script>
+</body>
+</html>
